@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+import fzf_fsearch
+
+try:
+    fzf_fsearch.main(*fzf_fsearch.main_args())
+except KeyboardInterrupt:
+    pass
