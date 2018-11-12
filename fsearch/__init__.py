@@ -36,12 +36,8 @@ def main_args():
     cmd.add_argument("prefilter", nargs="*")
 
     args = parser.parse_args(sys.argv[1:])
-
-    conf_dir_path = path_resolve("~/.config/fsearch")
-    conf_path = os.path.join(conf_dir_path, "config.json")
-
-    setattr(args, "conf_dir_path", conf_dir_path)
-    setattr(args, "conf_path", conf_path)
+    setattr(args, "conf_dir_path", DirOps.CONF_DIR_PATH)
+    setattr(args, "conf_path", DirOps.CONF_FILE_PATH)
 
     return args, parser
 
@@ -52,7 +48,7 @@ def main(args, parser):
     ops = DirOps(DirOps.parse_config())
     try:
         if args.command == 'init-conf':
-            DirOps.init_conf()
+            DirOps.cmd__init_conf()
         elif args.command == 'parent-dirs':
             ops.cmd__list_parent_dirs(stream)
         elif args.command == 'parent-files':
@@ -71,21 +67,21 @@ def main(args, parser):
 
 
 class DirOps:
+    Z_JUMP_FILE_PATH = path_resolve("~/.z")
+    CONF_DIR_PATH = path_resolve("~/.config/fsearch")
+    CONF_FILE_PATH = path_resolve(CONF_DIR_PATH, "config.json")
+
     DEFAULT_CONF = {
         "project_roots": [
             {"path": "~", "min": 1, "max": 2, "var": "HOME"},
         ]
     }
 
-    Z_JUMP_FILE_PATH = path_resolve("~/.z")
-    CONF_DIR_PATH = path_resolve("~/.config/fsearch")
-    CONF_FILE_PATH = path_resolve(CONF_DIR_PATH, "config.json")
-
     def __init__(self, conf):
         self.conf = conf
 
     @classmethod
-    def init_conf(cls):
+    def cmd__init_conf(cls):
         if not os.path.exists(cls.CONF_FILE_PATH):
             if not os.path.exists(cls.CONF_DIR_PATH):
                 os.mkdir(cls.CONF_DIR_PATH)
@@ -224,7 +220,6 @@ class DirOps:
         for file in self._z_path_order(files):
             stream.write(str(file))
             stream.write("\n")
-
 
     # { Private Utility Methods }
 
