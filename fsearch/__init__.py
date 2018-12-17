@@ -139,6 +139,7 @@ class DirOps:
 
     def cmd__list_parent_files(self, stream):
         cwd = os.getcwd()
+        #cur_dir = os.path.join(cwd, ".")
         cur_dir = cwd
         dir_list = list()
         while True:
