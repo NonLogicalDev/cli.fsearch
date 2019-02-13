@@ -67,13 +67,17 @@ def main(args, parser):
 
 
 class DirOps:
-    Z_JUMP_FILE_PATH = path_resolve("~/.z")
-    CONF_DIR_PATH = path_resolve("~/.config/fsearch")
+    CONF_DIR_PATH = path_resolve("$HOME/.config/fsearch")
     CONF_FILE_PATH = path_resolve(CONF_DIR_PATH, "config.json")
 
     DEFAULT_CONF = {
+        "z_jump_file": "${HOME}/.z",
         "project_roots": [
-            {"path": "~", "min": 1, "max": 2, "var": "HOME"},
+            {
+                "path": "${HOME}",
+                "min": 1, "max": 2,
+                "search": {"type": "d", "iname": ".git"},
+            }
         ]
     }
 
@@ -99,12 +103,12 @@ class DirOps:
             with open(cls.CONF_FILE_PATH) as f:
                 out.update(json.load(f))
 
-        if os.path.exists(cls.Z_JUMP_FILE_PATH):
+        z_file_path = path_resolve(out.get("z_jump_file", ""))
+        if os.path.exists(z_file_path):
             t = time.time()
-
             path_stats = {}
 
-            with open(cls.Z_JUMP_FILE_PATH) as f:
+            with open(z_file_path) as f:
                 for line in f.readlines():
                     path, freq, ts = line.split("|")
                     rfreq = float(freq)
@@ -118,7 +122,6 @@ class DirOps:
             })
 
         return out
-
 
     # { Commands }
 
@@ -255,7 +258,6 @@ class DirOps:
     @staticmethod
     def _cmdrun(cmd):
         out = subprocess.Popen([str(c) for c in cmd], stdout=subprocess.PIPE)
-        #out.wait()
         while True:
             line = out.stdout.readline()
             if line != '':
