@@ -5,8 +5,9 @@ import json
 import argparse
 import subprocess
 import time
+import threading as th
 
-from itertools import imap
+from itertools import imap, chain
 
 
 def path_resolve(*path):
@@ -142,13 +143,14 @@ class DirOps:
 
     def cmd__list_parent_files(self, stream):
         cwd = os.getcwd()
-        #cur_dir = os.path.join(cwd, ".")
-        cur_dir = cwd
+        cur_dir = os.path.join(cwd, ".")
         dir_list = list()
+
         while True:
             cur_dir_parent = os.path.dirname(cur_dir)
             if cur_dir == cur_dir_parent:
                 break
+
             dir_list.append(cur_dir_parent)
             cur_dir = cur_dir_parent
 
@@ -192,20 +194,17 @@ class DirOps:
     def cmd__list_projects(self, stream):
         files = []
 
-        for e in self.conf.get("project_roots", []):
+        def fn(e):
             path_spec = e.get("path", "")
             path = path_resolve(path_spec)
             if path == "":
-                continue
+                return []
 
             find_args = []
 
             search_spec = e.get("search", {})
-            if len(search_spec) > 0:
-                for param, val in search_spec.iteritems():
-                    find_args.extend(["-"+param, val])
-            else:
-                find_args.extend(["-type", "d"])
+            for param, val in search_spec.iteritems():
+                find_args.extend(["-"+param, val])
 
             mindepth = e.get("min", None)
             if mindepth is not None:
@@ -215,12 +214,20 @@ class DirOps:
             if maxdepth is not None:
                 find_args.extend(["-maxdepth", maxdepth])
 
-            found_files = imap(
-                lambda p: os.path.dirname(p),
-                self._find(path, find_args)
-            )
+            if e.get("parent", False):
+                found_files = imap(
+                    lambda p: os.path.dirname(p).replace(path, path_spec),
+                    self._find(path, find_args)
+                )
+            else:
+                found_files = self._find(path, find_args)
+
             files.extend([f.replace(path, path_spec) for f in found_files])
 
+        for e in self.conf.get("project_roots", []):
+            fn(e)
+
+        files = set(files)
         for file in self._z_path_order(files):
             stream.write(str(file))
             stream.write("\n")
@@ -264,6 +271,7 @@ class DirOps:
                 yield line.strip()
             else:
                 break
+        out.kill()
 
     @classmethod
     def _find(cls, dir, args):
