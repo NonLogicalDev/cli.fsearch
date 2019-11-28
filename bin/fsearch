@@ -1,7 +1,19 @@
-#!/rusr/bin/env python
+#!/usr/bin/env python3
+import sys
 import fsearch
+import argparse
 
-try:
-    fsearch.main(*fsearch.main_args())
-except KeyboardInterrupt:
-    pass
+
+def main():
+    parser = argparse.ArgumentParser(prog='fsearch')
+    try:
+        fsearch.App(parser).run(sys.argv[1:])
+    except KeyboardInterrupt:
+        return 1
+    except Exception as e:
+        parser.error(str(e))
+        return 130
+
+
+if __name__ == '__main__':
+    main()

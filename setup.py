@@ -1,11 +1,13 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="fsearch",
-    version="0.0.1",
-    description="A fuzzy matcher based on fzf.",
+    name="nl-fsearch",
+    version="0.0.2",
+    license="MIT",
+
     author="nonlogicaldev",
-    url="https://github.com/NonLogicalDev/nld.cli.fsearch",
+    description="A file/folder lookup tool for use with fzf.",
+    url="https://github.com/NonLogicalDev/cli.fsearch",
 
     packages=find_packages(),
     scripts=[
