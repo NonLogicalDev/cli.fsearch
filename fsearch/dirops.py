@@ -57,10 +57,10 @@ class DirOps:
                 return 0
 
         if path:
-            self.output.write(self.CONF_FILE_PATH)
+            self.output.write(CONF_FILE_PATH)
             return 0
 
-        self.output.write(json.dumps(self.DEFAULT_CONF, indent=4))
+        self.output.write(json.dumps(DEFAULT_CONF, indent=4))
         self.output.write("\n")
         return 0
 
@@ -188,7 +188,7 @@ class DirOps:
         # return sorted(map(lambda x: sort_order(x), paths), key=lambda x: x[0])
 
 
-def _ensure_dir(self, path):
+def _ensure_dir(path):
     if not os.path.exists(path):
         os.mkdir(path)
 
